@@ -1,0 +1,10 @@
+[package]
+name = "allocscope-trace"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+libc = "0.2"
+libunwind-sys = { version = "0.5.1", features = ["ptrace"] }
+object = "0.29.0"
+rusqlite = "0.28.0"

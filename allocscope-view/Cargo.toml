@@ -1,0 +1,11 @@
+[package]
+name = "allocscope-view"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+libc = "0.2"
+pancurses = "0.17.0"
+rusqlite = "0.28.0"
+rustc-demangle = "0.1.21"
+cplus_demangle = "0.1.2"
