@@ -19,6 +19,7 @@
 use crate::breakpoint;
 use crate::process_map;
 use crate::record;
+use crate::symbol_index;
 use crate::unwind;
 use std::collections::HashMap;
 use std::error::Error;
@@ -47,6 +48,10 @@ pub struct TraceContext<'trace_lifetime> {
     // address space.
     pub process_map: process_map::ProcessMap,
 
+    // Bookkeeping for the symbols from the binaries mmap-ed into the
+    // process's address space.
+    pub symbol_index: symbol_index::SymbolIndex,
+
     // Address space structure used by libunwind.
     pub unwind_address_space: unwind::AddressSpace,
 
@@ -66,6 +71,7 @@ impl<'trace_lifetime> TraceContext<'trace_lifetime> {
             breakpoint_set,
             transaction,
             process_map: process_map::ProcessMap::new(pid)?,
+            symbol_index: symbol_index::SymbolIndex::new(),
             unwind_address_space: unwind::AddressSpace::new_upt()?,
             thread_context: HashMap::new(),
         })
@@ -102,5 +108,18 @@ impl<'trace_lifetime> TraceContext<'trace_lifetime> {
         self.thread_context
             .get(&pid)
             .ok_or("missing thread context".into())
+    }
+
+    // The memory map of the process we are tracing has changed, so update
+    // the process map with all current memory mappings and reindex the
+    // the symbols of the process as new code may have been mapped in.
+    pub fn update_process_map(&mut self, pid: u32) -> Result<(), Box<dyn Error>> {
+        self.process_map = process_map::ProcessMap::new(pid)?;
+        self.symbol_index = symbol_index::SymbolIndex::new();
+        self.symbol_index.add_symbols(&self.process_map);
+        self.breakpoint_set
+            .resolve_breakpoints(pid, &self.symbol_index)?;
+
+        Ok(())
     }
 }

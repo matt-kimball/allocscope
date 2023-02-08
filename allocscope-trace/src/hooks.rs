@@ -18,7 +18,6 @@
 
 use crate::breakpoint;
 use crate::context;
-use crate::process_map;
 use crate::ptrace;
 use crate::record::EventType;
 use crate::unwind;
@@ -35,6 +34,7 @@ fn collect_stack(
 
     unwind::collect_stack(
         &context.process_map,
+        &context.symbol_index,
         &context.unwind_address_space,
         &thread_context.unwind_accessors,
     )
@@ -48,8 +48,7 @@ fn on_mmap(
     complete: bool,
 ) -> Result<(), Box<dyn Error>> {
     if complete {
-        context.process_map = process_map::ProcessMap::new(pid)?;
-        context.breakpoint_set.resolve_breakpoints(pid)?;
+        context.update_process_map(pid)?;
     }
 
     Ok(())

@@ -17,6 +17,7 @@
 */
 
 use crate::process_map;
+use crate::symbol_index;
 use libunwind_sys;
 use std::error::Error;
 use std::path;
@@ -104,6 +105,7 @@ impl Drop for UPTAccessors {
 // Collect the current stack from a stopped traced thread using libunwind.
 pub fn collect_stack(
     process_map: &process_map::ProcessMap,
+    symbol_index: &symbol_index::SymbolIndex,
     address_space: &AddressSpace,
     upt: &UPTAccessors,
 ) -> Result<Vec<StackEntry>, Box<dyn Error>> {
@@ -130,18 +132,10 @@ pub fn collect_stack(
             }
 
             let mut offset: libunwind_sys::unw_word_t = 0;
-            let mut name_vec: Vec<libc::c_char> = vec![0; 1024];
             let mut name: String = "".to_string();
-            if libunwind_sys::unw_get_proc_name(
-                &mut cursor,
-                name_vec.as_mut_ptr(),
-                1024,
-                &mut offset,
-            ) == 0
-            {
-                name = std::ffi::CStr::from_ptr(name_vec.as_mut_ptr())
-                    .to_string_lossy()
-                    .into_owned();
+            if let Some(symbol) = symbol_index.get_function_by_address(address) {
+                name = symbol.name.clone();
+                offset = address - symbol.address;
             } else {
                 // If we can't resolve the address to a function, instead use
                 // the filename from which the instructions are mapped.
@@ -151,7 +145,7 @@ pub fn collect_stack(
                         if let Some(basename) = path.file_name() {
                             if let Some(basename_str) = basename.to_str() {
                                 name = format!("[{}]", basename_str);
-                                offset = address - entry.begin;
+                                offset = address - entry.begin + entry.offset;
                             }
                         }
                     }

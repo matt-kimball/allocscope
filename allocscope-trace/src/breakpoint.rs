@@ -17,7 +17,6 @@
 */
 
 use crate::context;
-use crate::process_map;
 use crate::ptrace;
 use crate::symbol_index;
 use crate::trace;
@@ -233,25 +232,25 @@ impl BreakpointSet {
 
     // Resolve all loosely bound breakpoint using the current process map of
     // the traced process.
-    pub fn resolve_breakpoints(&mut self, pid: u32) -> Result<(), Box<dyn Error>> {
-        let process_map = process_map::ProcessMap::new(pid)?;
-        let mut symbol_index = symbol_index::SymbolIndex::new();
-        symbol_index.add_symbols(&process_map);
-
+    pub fn resolve_breakpoints(
+        &mut self,
+        pid: u32,
+        symbol_index: &symbol_index::SymbolIndex,
+    ) -> Result<(), Box<dyn Error>> {
         for binding in self.bindings.iter() {
-            match symbol_index.symbols.get(&binding.function_name) {
-                Some(entry) => {
+            match symbol_index.symbols_by_name.get(&binding.function_name) {
+                Some(entry_vec) => {
                     // For each address of the function, set a breakpoint.
                     // Multiple addresses might be necessary, because there
                     // might be multiple linked copies of a function with the
                     // same name.  (Consider multiple linked copies of libc
                     // in the same process.)
-                    for address in &entry.addresses {
-                        if !self.breakpoints.contains_key(address) {
+                    for entry in entry_vec {
+                        if !self.breakpoints.contains_key(&entry.address) {
                             add_breakpoint(
                                 &mut self.breakpoints,
                                 pid,
-                                *address,
+                                entry.address,
                                 binding.callback,
                                 true,
                             )?;

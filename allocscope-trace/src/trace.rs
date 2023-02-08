@@ -208,14 +208,14 @@ fn detach_from_tracee(context: &mut context::TraceContext) -> Result<(), Box<dyn
 fn trace_attached_pid(record: record::TraceRecord, pid: u32) -> Result<(), Box<dyn Error>> {
     let mut breakpoint_set = breakpoint::BreakpointSet::new();
     hooks::add_hooks(&mut breakpoint_set)?;
-    breakpoint_set.resolve_breakpoints(pid)?;
-    ptrace::setoptions(pid, libc::PTRACE_O_TRACECLONE)?;
-
-    // Now that we have set breakpoints, resume execution.
-    ptrace::syscall(pid, 0)?;
 
     let transaction = record::Transaction::new(&record)?;
     let mut context = context::TraceContext::new(pid, breakpoint_set, transaction)?;
+    context.update_process_map(pid)?;
+
+    // Now that we have set breakpoints, resume execution.
+    ptrace::setoptions(pid, libc::PTRACE_O_TRACECLONE)?;
+    ptrace::syscall(pid, 0)?;
 
     ptrace::block_term_signals()?;
     match trace_loop(&mut context, pid) {
