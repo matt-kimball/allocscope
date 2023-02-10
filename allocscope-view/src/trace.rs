@@ -433,6 +433,14 @@ impl Trace {
 
         let scratch_connection = rusqlite::Connection::open(scratch_filename)?;
 
+        // These pragmas improve write performance a bit.
+        scratch_connection.execute_batch(
+            "PRAGMA journal_mode = OFF;
+            PRAGMA synchronous = 0;
+            PRAGMA locking_mode = EXCLUSIVE;
+            PRAGMA temp_store = MEMORY;",
+        )?;
+
         scratch_connection.execute(
             "CREATE TABLE IF NOT EXISTS allocation_origin (
                 address INTEGER PRIMARY KEY,

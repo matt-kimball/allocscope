@@ -306,6 +306,14 @@ impl TraceRecord {
 
         let connection = rusqlite::Connection::open(filename)?;
 
+        // These pragmas improve write performance a bit.
+        connection.execute_batch(
+            "PRAGMA journal_mode = OFF;
+            PRAGMA synchronous = 0;
+            PRAGMA locking_mode = EXCLUSIVE;
+            PRAGMA temp_store = MEMORY;",
+        )?;
+
         connection.execute(
             "CREATE TABLE IF NOT EXISTS trace (
                 version TEXT NOT NULL,

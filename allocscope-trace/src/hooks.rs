@@ -36,7 +36,7 @@ fn collect_stack(
         &context.process_map,
         &context.symbol_index,
         &context.unwind_address_space,
-        &thread_context.unwind_accessors,
+        &thread_context.unwind_context,
     )
 }
 

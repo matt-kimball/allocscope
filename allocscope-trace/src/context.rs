@@ -30,7 +30,7 @@ pub struct TraceThreadContext {
     pub in_syscall: bool,
 
     // ptrace accessors used by libunwind to access the thread.
-    pub unwind_accessors: unwind::UPTAccessors,
+    pub unwind_context: unwind::UPTContext,
 }
 
 // Context relevant to the traced process.
@@ -85,7 +85,7 @@ impl<'trace_lifetime> TraceContext<'trace_lifetime> {
                 pid,
                 TraceThreadContext {
                     in_syscall: false,
-                    unwind_accessors: unwind::UPTAccessors::new(pid as i32)?,
+                    unwind_context: unwind::UPTContext::new(pid as i32)?,
                 },
             );
         }
