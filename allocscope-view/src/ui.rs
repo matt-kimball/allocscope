@@ -155,7 +155,7 @@ impl UIState {
 
         let width = self.screen.get_max_x();
         let mut support_link = format!(
-            "https://support.mkimball.net/  {} ",
+            "https://allocscope.com/support  {} ",
             env!("CARGO_PKG_VERSION")
         );
         while (support_link.len() as i32) < width - self.screen.get_cur_x() {

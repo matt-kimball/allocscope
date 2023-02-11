@@ -102,7 +102,7 @@ pub fn generate_report(trace: trace::Trace) -> Result<(), Box<dyn Error>> {
         rows::iter_stackentry_rows(&mut transaction, rows::SortMode::Bytes, None, 0, row_count)?;
 
     println!("allocscope {} memory report", env!("CARGO_PKG_VERSION"));
-    println!("https://support.mkimball.net/");
+    println!("https://allocscope.com/support");
     println!("");
     println!("BYTES BLOCK LEAKS   Function");
     for entry in rows {
