@@ -36,7 +36,7 @@ and processors in the future.
 
 ## Getting started
 
-While it will be likely be most useful to use allocscope on a program with symbols, which you
+While it will likely be most useful to use allocscope on a program with symbols, which you
 have compiled yourself, you can verify that it functions correctly by performing a trace on a 
 standard system command, such as `ls`:
 
