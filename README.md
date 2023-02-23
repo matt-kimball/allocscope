@@ -59,6 +59,9 @@ cargo install --path allocscope-trace
 cargo install --path allocscope-view
 ```
 
+If you are modifying the functionality of allocscope, you can run integration tests by executing
+the `test.sh` script in the root directory of the repository.
+
 Statically linked binaries can also be built using the `build-static/build.sh` script, though this requires
 Docker installed on the build system.
 

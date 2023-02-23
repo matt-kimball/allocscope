@@ -1,2 +1,2 @@
 [workspace]
-members = ["allocscope-trace", "allocscope-view"]
+members = ["allocscope-trace", "allocscope-view", "integration-test"]
